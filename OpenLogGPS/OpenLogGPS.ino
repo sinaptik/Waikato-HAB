@@ -8,6 +8,7 @@ SoftwareSerial nss(3, 4);
 SoftwareSerial radio(5, 6, false, true);
 
 int ledPin = 9;
+int lipoAnalogInPin = 0;
 
 static void gpsdump(TinyGPS &gps);
 static bool feedgps();
@@ -70,8 +71,8 @@ static void gpsdump(TinyGPS &gps)
   bufferString.print(gps.altitude()); bufferString.print(",");
   bufferString.print(gps.speed()); bufferString.print(",");
   bufferString.print(gps.hdop()); bufferString.print(",");
-  bufferString.println(age);
-  //send lipo votage
+  bufferString.print(age); bufferString.print(",");
+  bufferString.println(calcLipoVoltage(lipoAnalogInPin));
   //send last message strength?
     
   sendBufferOverRadio(bufferString.length());
@@ -79,6 +80,8 @@ static void gpsdump(TinyGPS &gps)
 
 static void sendBufferOverRadio(int bufferLength)
 {
+  //do something if bufferLength exceeds 256
+  
   radio.write(0xFB);
   radio.write((byte)(bufferLength + 4));
   radio.write(0x05);
@@ -88,6 +91,15 @@ static void sendBufferOverRadio(int bufferLength)
   
   for (int i = 0; i < bufferLength; i++)
     radio.write((byte)buffer[i]);
+}
+
+static float calcLipoVoltage(int voltagePin)
+{
+  int voltRead = analogRead(voltagePin);
+  float Vout = voltRead * 0.0048828;
+  float Vin = (Vout * 1.4666) + Vout;
+  
+  return Vin;
 }
 
 static bool feedgps()
