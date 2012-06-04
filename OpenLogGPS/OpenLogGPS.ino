@@ -3,9 +3,12 @@
 #include <TinyGPS.h>
 #include <DHT22.h>
 
+int radioRxPin = 5;
+int radioTxPin = 6;
+
 TinyGPS gps;
 SoftwareSerial nss(3, 4);
-SoftwareSerial radio(5, 6, false, true);
+SoftwareSerial radio(radioRxPin, radioTxPin, false, true);
 
 int ledPin = 9;
 int lipoAnalogInPin = 0;
@@ -22,6 +25,11 @@ int index, length;
 
 void setup()
 {
+  delay(1000);
+  pinMode(radioTxPin, OUTPUT);
+  digitalWrite(radioTxPin, HIGH);
+  delay(10);
+  
   nss.begin(4800);
   radio.begin(9600);
     
@@ -74,6 +82,7 @@ static void gpsdump(TinyGPS &gps)
   bufferString.print(age); bufferString.print(",");
   bufferString.println(calcLipoVoltage(lipoAnalogInPin));
   //send last message strength?
+  //temp & humidity
     
   sendBufferOverRadio(bufferString.length());
 }
