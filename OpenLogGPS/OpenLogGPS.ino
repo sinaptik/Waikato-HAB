@@ -1,13 +1,19 @@
 #include <PString.h>
 #include <SoftwareSerial.h>
 #include <TinyGPS.h>
-#include <DHT22.h>
+#include "DHT.h"
+
+int gpsRxPin = 3;
+int gpsTxpin = 4;
 
 int radioRxPin = 5;
 int radioTxPin = 6;
 
+DHT dhtInternal(7, DHT22);
+DHT dhtOutside(8, DHT22);
+
 TinyGPS gps;
-SoftwareSerial nss(3, 4);
+SoftwareSerial nss(gpsRxPin, gpsTxpin);
 SoftwareSerial radio(radioRxPin, radioTxPin, false, true);
 
 int ledPin = 9;
@@ -25,13 +31,15 @@ int index, length;
 
 void setup()
 {
-  delay(1000);
-  pinMode(radioTxPin, OUTPUT);
-  digitalWrite(radioTxPin, HIGH);
-  delay(10);
-  
+  //gps module runs at 4800
   nss.begin(4800);
+  
+  //radio runs at 9600
+  //TODO: use hardware serial
   radio.begin(9600);
+  
+  dhtInternal.begin();
+  dhtOutside.begin();
     
   //led pin
   pinMode(ledPin, OUTPUT);
@@ -73,6 +81,7 @@ static void gpsdump(TinyGPS &gps)
 
   bufferString.begin();
   bufferString.print(timeStamp); bufferString.print(",");
+  
   bufferString.print(hour); bufferString.print(":"); bufferString.print(minute); bufferString.print(":"); bufferString.print(second); bufferString.print(",");
   bufferString.print(latitude); bufferString.print(",");
   bufferString.print(longditude); bufferString.print(",");
@@ -80,17 +89,22 @@ static void gpsdump(TinyGPS &gps)
   bufferString.print(gps.speed()); bufferString.print(",");
   bufferString.print(gps.hdop()); bufferString.print(",");
   bufferString.print(age); bufferString.print(",");
+  
+  bufferString.print(dhtInternal.readTemperature()); bufferString.print(",");
+  bufferString.print(dhtInternal.readHumidity()); bufferString.print(",");
+  
+  bufferString.print(dhtOutside.readTemperature()); bufferString.print(",");
+  bufferString.print(dhtOutside.readHumidity()); bufferString.print(",");
+  
   bufferString.println(calcLipoVoltage(lipoAnalogInPin));
+  
   //send last message strength?
-  //temp & humidity
     
   sendBufferOverRadio(bufferString.length());
 }
 
 static void sendBufferOverRadio(int bufferLength)
-{
-  //do something if bufferLength exceeds 256
-  
+{ 
   radio.write(0xFB);
   radio.write((byte)(bufferLength + 4));
   radio.write(0x05);

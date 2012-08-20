@@ -16,7 +16,7 @@ DHT dhtR(DHTR, DHTTYPE);
 void setup() 
 {
   Serial.begin(9600); 
-  Serial.println("DHTxx test!");
+  Serial.println("LeftHumidity, LeftTemperature, RightHumidity, RightTemperature");
  
   dhtL.begin();
   dhtR.begin();
@@ -36,11 +36,10 @@ void loop()
   } 
   else 
   {
-    Serial.print("Left: ");
     Serial.print(hl);
-    Serial.print(" %\t");
+    Serial.print(", ");
     Serial.print(tl);
-    Serial.println(" *C");
+    Serial.print(", ");
   }
   
     // Reading temperature or humidity takes about 250 milliseconds!
@@ -55,12 +54,19 @@ void loop()
   } 
   else 
   {
-    Serial.print("Right: ");
     Serial.print(hr);
-    Serial.print(" %\t");
+    Serial.print(", ");
     Serial.print(tr);
-    Serial.println(" *C");
+    Serial.println();
   }
   
-  delay(1000);
+  digitalWrite(13, HIGH);
+  delay(100);
+  digitalWrite(13, LOW);
+  delay(100);
+  digitalWrite(13, HIGH);
+  delay(100);
+  digitalWrite(13, LOW);
+  delay(700);
+  
 }
