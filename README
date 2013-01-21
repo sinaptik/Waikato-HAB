@@ -1,5 +1,7 @@
 High altitude balloon project
 
 *Uses some custom Arduino libraries
-
-Made some edits yay
+*NewSoftSerial
+	in void NewSoftSerial::setRX(uint8_t rx) remove digitalWrite(rx, HIGH)
+*Resistor divider for lipo voltage sense is 15k and 22k (or 3.3 and 5.1)
+*Added watchdog timer

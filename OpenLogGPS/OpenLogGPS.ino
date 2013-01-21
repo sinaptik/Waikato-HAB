@@ -2,6 +2,7 @@
 #include <SoftwareSerial.h>
 #include <TinyGPS.h>
 #include "DHT.h"
+#include <avr/wdt.h>
 
 int gpsRxPin = 3;
 int gpsTxpin = 4;
@@ -31,11 +32,13 @@ int index, length;
 
 void setup()
 {
+  wdt_enable(WDTO_8S); //8 second watchdog timer
+
   //gps module runs at 4800
+  //TODO: use hardware serial for gps
   nss.begin(4800);
   
   //radio runs at 9600
-  //TODO: use hardware serial
   radio.begin(9600);
   
   dhtInternal.begin();
@@ -47,6 +50,8 @@ void setup()
 
 void loop()
 {
+  wdt_reset(); //feed the dog
+
   bool newdata = false;
   unsigned long start = millis();
   
